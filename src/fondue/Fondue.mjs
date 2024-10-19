@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { NAME_TABLE, NAME_RECORD, CMAP_RECORD } from "../tools/variables.js";
-import getCSS, { getCSSAsJSON } from "../tools/css/get-css.js";
-import slugify from "../tools/css/slugify.js";
-import featureMapping from "../tools/features/layout-features.js";
-import languageMapping from "../tools/ot-to-html-lang.js";
-import languageCharSets from "../tools/languageCharSets.js";
-import getFormat from "../tools/summary/format.js";
-import getFileSize from "../tools/summary/file-size.js";
-import getFilename from "../tools/summary/filename.js";
-import glyphData from "../tools/GlyphData.json";
+import { NAME_TABLE, NAME_RECORD, CMAP_RECORD } from "../tools/variables.mjs";
+import getCSS, { getCSSAsJSON } from "../tools/css/get-css.mjs";
+import slugify from "../tools/css/slugify.mjs";
+import featureMapping from "../tools/features/layout-features.mjs";
+import languageMapping from "../tools/ot-to-html-lang.mjs";
+import languageCharSets from "../tools/languageCharSets.mjs";
+import getFormat from "../tools/summary/format.mjs";
+import getFileSize from "../tools/summary/file-size.mjs";
+import getFilename from "../tools/summary/filename.mjs";
+import glyphData from "../tools/GlyphData.mjs";
 
 export default class Fondue {
 	_removeNullBytes(value) {
@@ -124,7 +124,7 @@ export default class Fondue {
 					.reduce((acc, script) => {
 						const scriptTable = table.getScriptTable(script);
 						return acc.concat(
-							table.getSupportedLangSys(scriptTable)
+							table.getSupportedLangSys(scriptTable),
 						);
 					}, [])
 					.map((lang) => lang.trim());
@@ -166,17 +166,18 @@ export default class Fondue {
 					case "GPOS":
 					case "GSUB": {
 						let features = table.featureList.featureRecords.map(
-							(record) => record.featureTag
+							(record) => record.featureTag,
 						);
 						features = features.filter(
 							(feature, index) =>
-								features.indexOf(feature) === index
+								features.indexOf(feature) === index,
 						); // remove doubles
 						let scripts = table.scriptList.scriptRecords.map(
-							(record) => record.scriptTag
+							(record) => record.scriptTag,
 						);
 						scripts = scripts.filter(
-							(script, index) => scripts.indexOf(script) === index
+							(script, index) =>
+								scripts.indexOf(script) === index,
 						); // remove doubles
 						return {
 							features,
@@ -208,7 +209,7 @@ export default class Fondue {
 								const axisRaw = table.getAxis(axis);
 								table.instances.map((instance) => {
 									const name = this.name(
-										instance.subfamilyNameID
+										instance.subfamilyNameID,
 									);
 									if (!instances[name]) {
 										instances[name] = {};
@@ -250,7 +251,7 @@ export default class Fondue {
 									record.languageID
 								];
 							const value = this._removeNullBytes(
-								this.name(nameId)
+								this.name(nameId),
 							);
 							return {
 								id: nameId,
@@ -311,7 +312,7 @@ export default class Fondue {
 		const getRawFeatures = (table) => {
 			if (!table) return [];
 			return table.featureList.featureRecords.map(
-				(record) => record.featureTag
+				(record) => record.featureTag,
 			);
 		};
 
@@ -382,7 +383,7 @@ export default class Fondue {
 				`#${hex(clr.red)}` +
 					`${hex(clr.green)}` +
 					`${hex(clr.blue)}` +
-					`${hex(clr.alpha)}`
+					`${hex(clr.alpha)}`,
 			);
 
 			return colors;
@@ -507,10 +508,11 @@ export default class Fondue {
 			[0, 0],
 		];
 		for (const [platformID, platEncID] of cmapPreferences) {
-			const cmapSubtable = this._font.opentype.tables.cmap.getSupportedCharCodes(
-				platformID,
-				platEncID
-			);
+			const cmapSubtable =
+				this._font.opentype.tables.cmap.getSupportedCharCodes(
+					platformID,
+					platEncID,
+				);
 			if (cmapSubtable) {
 				return cmapSubtable;
 			}
@@ -641,7 +643,8 @@ export default class Fondue {
 				let scripts = new Set();
 				const subcatScripts = glyphData.filter(
 					(f) =>
-						f.category === category && f.subCategory === subCategory
+						f.category === category &&
+						f.subCategory === subCategory,
 				);
 				subcatScripts.map((sc) => {
 					scripts.add(sc.script);
@@ -653,12 +656,12 @@ export default class Fondue {
 						(f) =>
 							f.category === category &&
 							f.subCategory === subCategory &&
-							f.script === script
+							f.script === script,
 					);
 
 					// Which chars are in the font?
 					const presentChars = chars.filter((g) =>
-						fontCharSet.includes(g.unicode)
+						fontCharSet.includes(g.unicode),
 					);
 
 					// We only need the unicode values
@@ -678,7 +681,7 @@ export default class Fondue {
 								(c) =>
 									c.category == subCharset.category &&
 									c.subCategory == subCharset.subCategory &&
-									c.script == subCharset.script
+									c.script == subCharset.script,
 							) === undefined
 						) {
 							charset.push(subCharset);
@@ -692,7 +695,7 @@ export default class Fondue {
 		// Also, ignore 0xFFFF which is erroneously reported as a char
 		// by Fontkit
 		const uncategorisedChars = fontCharSet.filter(
-			(g) => !allScriptChars.includes(g) && g != "FFFF"
+			(g) => !allScriptChars.includes(g) && g != "FFFF",
 		);
 		if (uncategorisedChars.length !== 0) {
 			charset.push({
@@ -746,7 +749,7 @@ export default class Fondue {
 				let records;
 				if (index >= 0) {
 					records = coverage.rangeRecords.filter(
-						(_, i) => index !== i
+						(_, i) => index !== i,
 					);
 				} else {
 					records = coverage.rangeRecords;
@@ -809,12 +812,12 @@ export default class Fondue {
 					subtable.alternateSetOffsets.forEach((_, j) => {
 						parsedLookup["input"] = charactersFromGlyphs(
 							coverage,
-							j
+							j,
 						);
 
 						const altset = subtable.getAlternateSet(j);
 						parsedLookup["alternateCount"].push(
-							altset.alternateGlyphIDs.length
+							altset.alternateGlyphIDs.length,
 						);
 					});
 				});
@@ -828,15 +831,13 @@ export default class Fondue {
 
 					if (coverage.glyphArray !== undefined) {
 						subtable.ligatureSetOffsets.forEach((_, setIndex) => {
-							const ligatureSet = subtable.getLigatureSet(
-								setIndex
-							);
+							const ligatureSet =
+								subtable.getLigatureSet(setIndex);
 
 							ligatureSet.ligatureOffsets.forEach(
 								(_, ligIndex) => {
-									const ligatureTable = ligatureSet.getLigature(
-										ligIndex
-									);
+									const ligatureTable =
+										ligatureSet.getLigature(ligIndex);
 
 									const sequence = [
 										coverage.glyphArray[setIndex],
@@ -846,10 +847,10 @@ export default class Fondue {
 									// Only keep sequences with glyphs mapped to letters
 									if (!sequence.includes(undefined)) {
 										parsedLookup["input"].push(
-											sequence.join("")
+											sequence.join(""),
 										);
 									}
-								}
+								},
 							);
 						});
 					}
@@ -884,27 +885,24 @@ export default class Fondue {
 
 					if (subtable.inputGlyphCount > 0) {
 						subtable.inputCoverageOffsets.forEach((offset) => {
-							const coverage = subtable.getCoverageFromOffset(
-								offset
-							);
+							const coverage =
+								subtable.getCoverageFromOffset(offset);
 							inputChars = charactersFromGlyphs(coverage);
 						});
 					}
 
 					if (subtable.backtrackGlyphCount > 0) {
 						subtable.backtrackCoverageOffsets.forEach((offset) => {
-							const coverage = subtable.getCoverageFromOffset(
-								offset
-							);
+							const coverage =
+								subtable.getCoverageFromOffset(offset);
 							backtrackChars = charactersFromGlyphs(coverage);
 						});
 					}
 
 					if (subtable.lookaheadGlyphCount > 0) {
 						subtable.lookaheadCoverageOffsets.forEach((offset) => {
-							const coverage = subtable.getCoverageFromOffset(
-								offset
-							);
+							const coverage =
+								subtable.getCoverageFromOffset(offset);
 							lookaheadChars = charactersFromGlyphs(coverage);
 						});
 					}
@@ -932,20 +930,20 @@ export default class Fondue {
 					if (preCheck === postCheck) {
 						parsedLookup["input"][i] = mergeUniqueCoverage(
 							parsedLookup["input"][i],
-							inputChars
+							inputChars,
 						);
 
 						if (backtrackChars) {
 							parsedLookup["backtrack"][i] = mergeUniqueCoverage(
 								parsedLookup["backtrack"][i],
-								backtrackChars
+								backtrackChars,
 							);
 						}
 
 						if (lookaheadChars) {
 							parsedLookup["lookahead"][i] = mergeUniqueCoverage(
 								parsedLookup["lookahead"][i],
-								lookaheadChars
+								lookaheadChars,
 							);
 						}
 					}
@@ -990,12 +988,11 @@ export default class Fondue {
 							].push(parsedLookup);
 						}
 
-						allGlyphs[script][lang][feature.featureTag][
-							"summary"
-						] = createType6Summary(
-							allGlyphs[script][lang][feature.featureTag],
-							true
-						);
+						allGlyphs[script][lang][feature.featureTag]["summary"] =
+							createType6Summary(
+								allGlyphs[script][lang][feature.featureTag],
+								true,
+							);
 					});
 				});
 			});
@@ -1066,7 +1063,7 @@ const createType6Summary = (feature, randomize) => {
 
 	let summarizedCombinations = allCombinations
 		.reduce((a, b) =>
-			a.reduce((r, v) => r.concat(b.map((w) => [].concat(v, w))), [])
+			a.reduce((r, v) => r.concat(b.map((w) => [].concat(v, w))), []),
 		)
 		.map((a) => a.join(""));
 
